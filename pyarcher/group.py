@@ -3,11 +3,11 @@
 """User module."""
 from dataclasses import dataclass
 
-from pyarcher.archer import Archer
+from pyarcher.base import ArcherBase
 
 
 @dataclass
-class Group(Archer):
+class Group(ArcherBase):
     """[summary].
 
     Args:
@@ -18,14 +18,14 @@ class Group(Archer):
 
     """
 
-    group_id: int
+    group_id: int = None
     _name: str = None
     _roles: list = None
     _members: list = None
 
-    def __post_init__(self, *args, **kwargs):
-        """Post Init"""
-        super().__init__(*args, **kwargs)
+    def __post_init__(self):
+        if not self.group_id:
+            raise Exception("You must specify group_id")
 
     def get_group_details(self):
         """

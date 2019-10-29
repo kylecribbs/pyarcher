@@ -3,11 +3,11 @@
 """User module."""
 from dataclasses import dataclass
 
-from pyarcher.archer import Archer
+from pyarcher.base import ArcherBase
 
 
 @dataclass
-class User(Archer):
+class User(ArcherBase):
     """[summary].
 
     Args:
@@ -18,14 +18,15 @@ class User(Archer):
 
     """
 
-    user_id: int
+    user_id: int = None
     _email: list = None
     _display_name: str = None
     _username: str = None
     _last_login_date: str = None
 
     def __post_init__(self, *args, **kwargs):
-        """Post Init"""
+        if not self.user_id:
+            raise Exception("You must specify a user_id")
         super().__init__(*args, **kwargs)
 
 
@@ -36,6 +37,7 @@ class User(Archer):
         """
         api_url = f"core/system/user/{self.user_id}"
         resp_data = self.request_helper(api_url, method="get").json()
+        return resp_data
         # TODO: set self attributes from resp
 
     def capture_user_email(self):
