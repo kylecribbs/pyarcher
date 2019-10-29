@@ -1,0 +1,15 @@
+{
+    "python.pythonPath": "C:\\Users\\gotbo\\.virtualenvs\\pyarcher-nkiGscmd\\Scripts\\python.exe",
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "docstringFormatter.makeSummaryMultiline": true,
+    "editor.minimap.maxColumn": 80,
+    "python.linting.banditEnabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.linting.pydocstyleEnabled": true
+}

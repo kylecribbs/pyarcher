@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+invoke = "*"
+bumpversion = "*"
+coverage = "*"
+wheel = "*"
+sphinx = "*"
+twine = "*"
+tox = "*"
+"flake8" = "*"
+pylint = "*"
+pytest = "*"
+isort = "*"
+yapf = "*"
+setuptools = "*"
+autopep8 = "*"
+bandit = "*"
+pydocstyle = "*"
+mypy = "*"
+ptpython = "*"
+
+[packages]
+pyarcher = {path = ".",editable = true}
+requests = "*"
