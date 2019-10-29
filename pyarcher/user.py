@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """User module."""
-from dataclasses import dataclass
-
 from pyarcher.base import ArcherBase
 
 
-@dataclass
 class User(ArcherBase):
     """[summary].
 
@@ -17,18 +14,15 @@ class User(ArcherBase):
         [type]: [description]
 
     """
+    # _email: list = None
+    # _display_name: str = None
+    # _username: str = None
+    # _last_login_date: str = None
 
-    user_id: int = None
-    _email: list = None
-    _display_name: str = None
-    _username: str = None
-    _last_login_date: str = None
-
-    def __post_init__(self, *args, **kwargs):
-        if not self.user_id:
-            raise Exception("You must specify a user_id")
-        super().__init__(*args, **kwargs)
-
+    def __init__(self, user_id: int, **kwargs):
+        print(kwargs)
+        super().__init__(**kwargs)
+        self.user_id = user_id
 
     def get_user_details(self):
         """

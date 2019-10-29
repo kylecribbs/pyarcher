@@ -2,7 +2,6 @@
 
 """Main module."""
 import logging
-from dataclasses import dataclass
 
 import requests
 
@@ -18,7 +17,6 @@ logging.basicConfig(
 )
 
 
-@dataclass
 class Archer(ArcherBase):
     """Creates archer instance object using following arguments
 
@@ -38,6 +36,27 @@ class Archer(ArcherBase):
     Attributes:
 
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _pass_archer_base(self):
+        to_pass = [
+            "url", "instance_name", "user_domain", "username", "password",
+            "client_cert", "session_token"
+        ]
+        to_pass_dict = {
+            key: value
+            for key, value in self.__dict__.items()
+            if key in to_pass and value
+        }
+        return to_pass_dict
+
+    def user(self, user_id):
+        to_pass = self._pass_archer_base()
+        to_pass['user_id'] = user_id
+        user = User(**to_pass)
+        return user
 
     def get_users(self, params: dict):
         """Get Users

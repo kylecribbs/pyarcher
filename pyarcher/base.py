@@ -13,7 +13,6 @@ logging.basicConfig(
 )
 
 
-@dataclass
 class ArcherBase:
     """Creates archer instance object using following arguments
 
@@ -34,24 +33,32 @@ class ArcherBase:
 
     """
 
-    url: str
-    instance_name: str
-    user_domain: str = None
-    username: str = None
-    password: str = None
-    client_cert: tuple = None
-
-    def __post_init__(self):
-        """Post Init"""
+    def __init__(
+        self,
+        url: str,
+        instance_name: str,
+        user_domain: str = None,
+        username: str = None,
+        password: str = None,
+        client_cert: tuple = None,
+        session_token: str = None,
+    ):
+        """Init."""
         self.logger = logging.getLogger(__name__)
+
+        self.url = url
+        self.instance_name = instance_name
+        self.user_domain = user_domain
+        self.username = username
+        self.password = password
+        self.client_cert = client_cert
+        self.session_token = session_token
 
         self.api_url_base = f"{self.url}/api/"
         self.content_api_url_base = f"{self.url}/contentapi/"
 
         self.session = requests.Session()
         self.session.cert = self.client_cert
-
-        self.session_token = ""
 
     def request_helper(
         self,
