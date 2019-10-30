@@ -2,7 +2,6 @@
 
 """User module."""
 from pyarcher.base import ArcherBase
-from pyarcher.field import Field
 
 
 class SubForm(ArcherBase):
