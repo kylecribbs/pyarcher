@@ -37,9 +37,6 @@ class Archer(ArcherBase):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def _pass_archer_base(self):
         to_pass = [
             "url", "instance_name", "user_domain", "username", "password",
@@ -58,25 +55,33 @@ class Archer(ArcherBase):
         user = User(**to_pass)
         return user
 
-    def get_users(self, params: dict):
-        """Get Users
+    def query_users(self, params: dict, raw=False):
+        """Query for Users
 
         Args:
             params (dict): Send a dictionary of ODATA Params without the "$".
-                Example: params['select'] = "Id, Username,FirstName"
+                Example: params['filter'] = "AccountStatus eq '1'"
 
         Returns:
             requests.models.Response: The response of the http call from
                 requests.
         """
+        if "Id" not in params.get(
+            "select",
+            "Id,DisplayName,FirstName,LastName"
+        ):
+            params['select'] = f"Id,{params['select']}"
 
+        params = {f"${key}": value for key, value in params.items()}
         resp = self.request_helper(
             "core/system/user/",
             method="get",
             params=params
         )
         resp_data = resp.json()
-        return [User(user) for user in resp_data]
+        if raw:
+            return resp
+        return [self.user(user['RequestedObject']['Id']) for user in resp_data]
 
     def create_user(
         self,

@@ -2,7 +2,6 @@
 
 """Main module."""
 import logging
-from dataclasses import dataclass
 
 import requests
 
@@ -156,4 +155,5 @@ class ArcherBase:
 
     def logout(self):
         """Archer Logout"""
+        # TODO: Create logout
         pass
