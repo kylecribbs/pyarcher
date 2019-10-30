@@ -4,7 +4,7 @@
 from pyarcher.base import ArcherBase
 
 
-class Group(ArcherBase):
+class Field(ArcherBase):
     """[summary].
 
     Args:
@@ -15,15 +15,15 @@ class Group(ArcherBase):
 
     """
 
-    group_id: int = None
     _metadata: dict = None
 
-    def __init__(self, group_id: int, **kwargs):
-        self.group_id = group_id
+    def __init__(self, field_id: int = None, **kwargs):
+        self.field_id = field_id
         super().__init__(**kwargs)
 
-    def refresh_group_details(self):
-        api_url = f"core/system/group/{self.group_id}"
+    def refresh_field_details(self):
+        # TODO: Find Route
+        api_url = f"core/system/user/{self.field_id}"
         resp_data = self.request_helper(api_url, method="get").json()
         self._metadata = resp_data['RequestedObject']
         return self._metadata
@@ -34,19 +34,7 @@ class Group(ArcherBase):
 
     @property
     def metadata(self):
-        """Property method for Email"""
+        """Property method for metadata"""
         if not self._metadata:
-            self._metadata = self.refresh_group_details()
+            self._metadata = self.refresh_field_details()
         return self._metadata
-
-    def add_user(self, user_id):
-        pass
-
-    def remove_user(self, user_id):
-        pass
-
-    def members(self):
-        pass
-
-    def member_of(self):
-        pass

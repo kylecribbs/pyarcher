@@ -7,7 +7,7 @@ import requests
 
 from pyarcher.user import User
 from pyarcher.group import Group
-#from pyarcher.record import Record
+from pyarcher.application import Application
 from pyarcher.base import ArcherBase
 
 logging.basicConfig(
@@ -108,99 +108,43 @@ class Archer(ArcherBase):
 
         return resp
 
+    def group(self, group_id):
+        to_pass = self._pass_archer_base()
+        to_pass['group_id'] = group_id
+        group = Group(**to_pass)
+        return group
 
-    def groups_by_name(self) -> dict:
-        """
-        :return: populate Archer_instance object with json >  self.archer_groups_name_to_id[name] = id
-        """
+    def all_groups(self) -> dict:
         resp = self.request_helper("core/system/group/", method="get")
         resp_data = resp.json()
+        groups = []
         for group in resp_data:
-            name = group["RequestedObject"]["Name"]
-            id = group["RequestedObject"]["Id"]
-            self.archer_groups_name_to_id[name] = id
-        log.info("Groups are downloaded")
-        return self
-
-
-    def find_group(self, name=None):
-        """
-        :param name: possible name of the group
-        :return: True if name exist and False if name is not found, also prints existing or similar groups
-        """
-        not_found = ""
-        found = ""
-
-        for i in self.archer_groups_name_to_id.keys():
-            if name is i:
-                return True
-            elif not name:
-                not_found += i + ", "
-            elif name in i:
-                found += i + ", "
-            else:
-                not_found = i + ", "
-
-        if not name:
-            print(f"Name not provided, here are all groups:\n", not_found)
-        elif found != "":
-            print(f"Matches for group '{name}':\n", found)
-        else:
-            print(f"Cannot find group '{name}', please try:\n", not_found)
-
-        return False
-
-    def get_group_id(self, group_name):
-        """
-        :param group_name: Name of Archer Group
-        :return: the name, or False and prints all groups
-        """
-        try:
-            return self.archer_groups_name_to_id[group_name]
-        except:
-            print("No such name, try...")
-            for key in self.archer_groups_name_to_id.keys():
-                print(key, ", ", end="")
-            print()
-            return False
-
+            new_group = self.group(group["RequestedObject"]["Id"])
+            new_group._set_metadata(group["RequestedObject"])
+            groups.append(new_group)
+        return groups
 
 
     def get_active_users_with_no_login(self):
-        """
-        :return: list of User objects
-        """
-        return self.get_users("?$select=Id,UserName,DisplayName&$filter=AccountStatus eq '1' "
-                              "and LastLoginDate eq null&$orderby=LastName")
+        params = {
+            "select": "Id,UserName,DisplayName",
+            "filter": "AccountStatus eq '1'and LastLoginDate eq null",
+            "orderby": "LastName"
+        }
+        return self.query_users(params)
 
-    def from_application(self, app_name=None):
-        """
-        :param app_name: sets app you will be working on; type name how it appears in Archer
-        :return: self, fills Archer_instance object with proper app_id and fields_ids
-        """
-        api_url = f"{self.api_url_base}core/system/application/"
+    def application(self, app_id):
+        to_pass = self._pass_archer_base()
+        to_pass['app_id'] = app_id
+        application = Application(**to_pass)
+        return application
 
-        try:
-            response = requests.get(api_url, headers=self.header, verify=False)
-            data = json.loads(response.content.decode("utf-8"))
-
-            all_folders = []
-            application_id = None
-
-            for application in data:
-                if application["RequestedObject"]["Name"] == app_name:
-                    application_id = application["RequestedObject"]["Id"]
-                    self.get_application_fields(application_id)
-                    break
-                all_folders.append(application["RequestedObject"]["Name"])
-
-            if not application_id:
-                raise RuntimeError(f'Application "{app_name}" is not found, available applications are {all_folders}')
-
-        except Exception as e:
-            log.error("Function from_application() didn't work, %s", e)
-
-        return self
+    def all_application(self):
+        resp = self.request_helper("core/system/application/", method="get")
+        resp_data = resp.json()
+        return [
+            self.application(app['RequestedObject']['Id']) for app in resp_data
+        ]
 
     def get_application_fields(self, application_id):
         """

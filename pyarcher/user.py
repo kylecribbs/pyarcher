@@ -15,20 +15,17 @@ class User(ArcherBase):
 
     """
 
-    _metadata = None
+    _metadata: dict = None
 
     def __init__(self, user_id: int = None, **kwargs):
         self.user_id = user_id
         super().__init__(**kwargs)
 
-    def get_user_details(self):
-        """
-        :param user_id: internal Archer user id
-        :return: User object
-        """
+    def refresh_user_details(self):
         api_url = f"core/system/user/{self.user_id}"
         resp_data = self.request_helper(api_url, method="get").json()
-        return resp_data['RequestedObject']
+        self._metadata = resp_data['RequestedObject']
+        return self._metadata
 
     def get_user_email(self):
         resp = self.request_helper(
@@ -39,11 +36,15 @@ class User(ArcherBase):
         if resp_data[0]['IsSuccessful']:
             return resp_data
 
+    def _set_metadata(self, data: dict) -> dict:
+        self._metadata = data
+        return self._metadata
+
     @property
     def metadata(self):
-        """Property method for Email"""
+        """Property method for metadata"""
         if not self._metadata:
-            self._metadata = self.get_user_details()
+            self._metadata = self.refresh_user_details()
         return self._metadata
 
     def assign_role(self, role_id):
@@ -63,6 +64,9 @@ class User(ArcherBase):
         )
         return resp
 
+    def remove_role(self, role_id):
+        pass
+
     def assign_group(self, group_id):
         """
         :param group: Name of the group how you see it in Archer
@@ -79,6 +83,9 @@ class User(ArcherBase):
             data=data
         )
         return resp
+
+    def remove_group(self, group_id):
+        pass
 
     def activate(self):
         """
