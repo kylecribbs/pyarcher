@@ -37,6 +37,9 @@ class Archer(ArcherBase):
 
     """
 
+    def refresh_metadata(self):
+        pass
+
     def _pass_archer_base(self):
         to_pass = [
             "url", "instance_name", "user_domain", "username", "password",
@@ -108,11 +111,8 @@ class Archer(ArcherBase):
 
         return resp
 
-    def group(self, group_id):
-        to_pass = self._pass_archer_base()
-        to_pass['group_id'] = group_id
-        group = Group(**to_pass)
-        return group
+    def group(self, obj_id):
+        return self.factory(obj_id, Group)
 
     def all_groups(self) -> dict:
         resp = self.request_helper("core/system/group/", method="get")
@@ -120,7 +120,7 @@ class Archer(ArcherBase):
         groups = []
         for group in resp_data:
             new_group = self.group(group["RequestedObject"]["Id"])
-            new_group._set_metadata(group["RequestedObject"])
+            new_group.metadata(group["RequestedObject"])
             groups.append(new_group)
         return groups
 
@@ -133,11 +133,8 @@ class Archer(ArcherBase):
         }
         return self.query_users(params)
 
-    def application(self, app_id):
-        to_pass = self._pass_archer_base()
-        to_pass['app_id'] = app_id
-        application = Application(**to_pass)
-        return application
+    def application(self, obj_id):
+        return self.factory(obj_id, Application)
 
     def all_application(self):
         resp = self.request_helper("core/system/application/", method="get")
@@ -145,119 +142,6 @@ class Archer(ArcherBase):
         return [
             self.application(app['RequestedObject']['Id']) for app in resp_data
         ]
-
-    def get_application_fields(self, application_id):
-        """
-        :param application_id: Internal Archer application id, I found it in LevelId if I remember correctly
-        :return: Fills the object with all active application fields:
-                all_application_fields_array - array of active fields [id1, id2, id3]
-                application_fields_json - {{name:id}, {id: {"Type": f_type, "FieldId": id}}}
-                subforms_json_by_sf_name - {subform_name: {name:id}, {id: {"Type": f_type, "FieldId": id}},{"LevelId": level_id})
-        """
-
-        api_url = f"{self.api_url_base}core/system/fielddefinition/application/" + str(
-                application_id) + "?$filter=IsActive eq true"
-
-        try:
-            response = requests.get(api_url, headers=self.header, verify=False)
-            data = json.loads(response.content.decode("utf-8"))
-
-            for field in data:
-                name = field["RequestedObject"]["Name"]
-                id = field["RequestedObject"]["Id"]
-                level_id = field["RequestedObject"]["LevelId"]
-                f_type = field["RequestedObject"]["Type"]
-
-                self.all_application_fields_array.append(id)
-                self.application_fields_json.update({name: id})
-                self.application_fields_json.update({id: {"Type": f_type, "FieldId": id}})
-
-                if f_type == 4: #populate values for values list
-                    self.vl_name_to_vl_id.update({name: field["RequestedObject"]["RelatedValuesListId"]})
-
-                elif f_type == 24: #populate fileds from subforms, up to text fields
-                    subform_name = field["RequestedObject"]["Name"]
-                    subform_id = field["RequestedObject"]["RelatedSubformId"]
-                    subform_fields_json, all_fields = self.get_subform_fields_by_id(subform_id)
-                    self.subforms_json_by_sf_name.update({subform_name: subform_fields_json})
-                    self.subforms_json_by_sf_name[subform_name].update({"AllFields": all_fields})
-
-            self.application_level_id = str(level_id) # set the application ID, I found it here
-
-        except Exception as e:
-            log.error("Function get_application_fields() didn't work, %s", e)
-
-    def get_subform_fields_by_id(self, sub_form_id):
-        """
-        :param sub_form_id: Gets from parent application field ("RelatedValuesListId"). Note:
-                                         I was only interested in text fields and attachments
-        :return: {{name:id}, {id: {"Type": f_type, "FieldId": id}, {"LevelId": level_id}}}
-        """
-        api_url = f"{self.api_url_base}core/system/fielddefinition/application/" + str(
-                sub_form_id) + "?$filter=IsActive eq true"
-
-        try:
-            response = requests.get(api_url, headers=self.header, verify=False)
-            data = json.loads(response.content.decode("utf-8"))
-            subform_fields_names = {}
-            fields_ids = []
-            for field in data:
-                f_name = field["RequestedObject"]["Name"]
-                id = field["RequestedObject"]["Id"]
-                f_type = field["RequestedObject"]["Type"]
-                level_id = field["RequestedObject"]["LevelId"]
-                fields_ids.append(id)
-                subform_fields_names.update({f_name: id})
-                subform_fields_names.update({"LevelId": level_id})
-                subform_fields_names.update({id: {"Type": f_type, "FieldId": id}})
-            return subform_fields_names, fields_ids
-
-        except Exception as e:
-            log.error("Function get_subform_fields_by_id didn't work, %s", e)
-
-    def get_vl_id_by_field_name(self, vl_field_name):
-        """
-        :param vl_field_name: values list name
-        :return: vl_id
-        """
-        return self.vl_name_to_vl_id[vl_field_name]
-
-    def get_value_id_by_field_name_and_value(self,field_name, value):
-        values_list_id = self.get_vl_id_by_field_name(field_name)
-        api_url = self.api_url_base + "core/system/valueslistvalue/flat/valueslist/" + str(values_list_id)
-
-        try:
-            response = requests.get(api_url, headers=self.header, verify=False)
-            data = json.loads(response.content.decode("utf-8"))
-
-            for ind_value in data:
-                if  ind_value["RequestedObject"]["Name"]== value:
-                    ret_arr = []
-                    ret_arr.append(ind_value["RequestedObject"]["Id"])
-                    return ret_arr
-
-        except Exception as e:
-            log.error("Function get_value_id_by_field_name_and_value didn't work, %s", e)
-
-    def get_field_id_by_name(self, field_name, sub_form_name=None):
-        """
-        :param sub_form_name: Add only if you need id of a subform of application, how you see it on the app
-        :param field_name: How you see it in app
-        :return: field_id
-        """
-        if sub_form_name:
-            return self.subforms_json_by_sf_name[sub_form_name][field_name]
-        else:
-            return self.application_fields_json[f"{field_name}"]
-
-    def add_value_to_field(self, id, value_content):
-        """
-        :param id: uniques internal Archer field_id
-        :param value_content: could be text, [value for vl], [sub_record_content_id1, sub_record_content_id2, ...]
-        """
-        template_for_field_update = dict(self.application_fields_json[id])
-        template_for_field_update["Value"] = value_content
-        return template_for_field_update
 
     def create_content_record(self, fields_json, record_id=None):
         """
@@ -405,9 +289,8 @@ class Archer(ArcherBase):
         except Exception as e:
             log.error("Function get_sub_record() didn't work, %s", e)
 
-# THIS PART IS USING ARCHER GRC API, NOT REST API USED ABOVE
 
-    def find_grc_endpoint_url(self, app_name):
+    def all_endpoints(self):
         """
         :param app_name: Try a name you see in the app
         :return: You will get printout of all similar grc_api endpoints urls that
@@ -415,14 +298,11 @@ class Archer(ArcherBase):
                  For all grc_api calls use the name you get.
         """
 
-        response = requests.get(self.content_api_url_base, headers=self.header, verify=False)
-        data = json.loads(response.content.decode("utf-8"))
+        resp = self.request_helper("", content_api=True, method="get")
+        return resp.json()['value']
 
-        print("I've found the following: ")
-
-        for endpoint in data["value"]:
-            if app_name in endpoint["name"]:
-                print("endpoint_url: ", endpoint["url"])
+    def records(self):
+        pass
 
     def get_grc_endpoint_records(self, endpoint_url, skip=None):
         """

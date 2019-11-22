@@ -28,7 +28,7 @@ class Group(ArcherBase):
         self._metadata = resp_data['RequestedObject']
         return self._metadata
 
-    def _set_metadata(self, data: dict) -> dict:
+    def metadata(self, data: dict) -> dict:
         self._metadata = data
         return self._metadata
 

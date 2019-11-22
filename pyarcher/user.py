@@ -36,7 +36,7 @@ class User(ArcherBase):
         if resp_data[0]['IsSuccessful']:
             return resp_data
 
-    def _set_metadata(self, data: dict) -> dict:
+    def metadata(self, data: dict) -> dict:
         self._metadata = data
         return self._metadata
 

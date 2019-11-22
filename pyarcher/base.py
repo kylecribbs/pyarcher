@@ -2,6 +2,7 @@
 
 """Main module."""
 import logging
+from abc import ABCMeta, abstractmethod
 
 import requests
 
@@ -12,7 +13,7 @@ logging.basicConfig(
 )
 
 
-class ArcherBase:
+class ArcherBase(metaclass=ABCMeta):
     """Creates archer instance object using following arguments
 
     A username and password or a cert and key must be passed to initiate an
@@ -32,6 +33,8 @@ class ArcherBase:
 
     """
 
+    _metdata: dict = None
+
     def __init__(
         self,
         url: str,
@@ -50,14 +53,13 @@ class ArcherBase:
         self.user_domain = user_domain
         self.username = username
         self.password = password
-        self.client_cert = client_cert
         self.session_token = session_token
 
         self.api_url_base = f"{self.url}/api/"
         self.content_api_url_base = f"{self.url}/contentapi/"
 
         self.session = requests.Session()
-        self.session.cert = self.client_cert
+        self.session.cert = client_cert
 
     def request_helper(
         self,
@@ -154,6 +156,41 @@ class ArcherBase:
         return resp
 
     def logout(self):
-        """Archer Logout"""
+        """Archer Logout."""
         # TODO: Create logout
         pass
+
+    def factory(self, obj_id, obj):
+        to_pass = self._pass_archer_base()
+        to_pass['obj_id'] = obj_id
+        pass_obj = obj(**to_pass)
+        return pass_obj
+
+    def _pass_archer_base(self):
+        to_pass = [
+            "url", "instance_name", "user_domain", "username", "password",
+            "client_cert", "session_token"
+        ]
+        to_pass_dict = {
+            key: value
+            for key, value in self.__dict__.items()
+            if key in to_pass and value
+        }
+        return to_pass_dict
+
+    @abstractmethod
+    def refresh_metadata(self):
+        """Refresh Metadata Abstract Method."""
+
+    @property
+    def metadata(self):
+        """Property method for metadata."""
+        if not self._metadata:
+            self._metadata = self.refresh_metadata()
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, data: dict) -> dict:
+        self._metadata = data
+        return self._metadata
+

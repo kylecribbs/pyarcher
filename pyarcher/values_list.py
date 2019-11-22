@@ -14,17 +14,19 @@ class ValuesList(ArcherBase):
         [type]: [description]
 
     """
-
     _metadata: dict = None
     _values: list = None
 
-    def __init__(self, values_list_id: int = None, **kwargs):
-        self.values_list_id = values_list_id
+    def __init__(self, obj_id: int = None, **kwargs):
+        self.obj_id = obj_id
         super().__init__(**kwargs)
+
+    def refresh_metadata(self):
+        pass
 
     def refresh_values(self):
         api_url = "core/system/valueslistvalue/flat/valueslist/{}".format(
-            self.values_list_id
+            self.obj_id
         )
         resp_data = self.request_helper(api_url, method="get").json()
         self._values = [value['RequestedObject'] for value in resp_data]
