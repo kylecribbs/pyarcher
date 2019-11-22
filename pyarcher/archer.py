@@ -38,6 +38,7 @@ class Archer(ArcherBase):
     """
 
     def refresh_metadata(self):
+        """Refresh Metadata."""
         pass
 
     def _pass_archer_base(self):
