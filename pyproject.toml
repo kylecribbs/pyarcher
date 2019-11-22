@@ -1,0 +1,7 @@
+[tool.commitizen]
+version = "0.1.0"
+tag_format = "v$version"
+files = [
+  "pyproject.toml:version",
+  "pyarcher/__version__.py"
+]
