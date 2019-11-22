@@ -3,5 +3,6 @@ version = "2.2.0"
 tag_format = "v$version"
 files = [
   "pyproject.toml:version",
-  "pyarcher/__init__.py:__version__"
+  "pyarcher/__init__.py:__version__",
+  "setup.py:__version__"
 ]
