@@ -37,30 +37,28 @@ class Archer(ArcherBase):
 
     """
 
+    _group_membership: dict = None
+
     def refresh_metadata(self):
         """Refresh Metadata."""
         pass
 
-    def _pass_archer_base(self):
-        to_pass = [
-            "url", "instance_name", "user_domain", "username", "password",
-            "client_cert", "session_token"
-        ]
-        to_pass_dict = {
-            key: value
-            for key, value in self.__dict__.items()
-            if key in to_pass and value
-        }
-        return to_pass_dict
+    def get_user(self, obj_id: int):
+        """Get a user.
 
-    def user(self, user_id):
-        to_pass = self._pass_archer_base()
-        to_pass['user_id'] = user_id
-        user = User(**to_pass)
-        return user
+        Get a archer user object
 
-    def query_users(self, params: dict, raw=False):
-        """Query for Users
+        Args:
+            obj_id (int): User ID
+
+        Returns:
+            pyarcher.user.User
+
+        """
+        return self.factory(obj_id, User)
+
+    def query_users(self, params: dict = {}, raw=False):
+        """Query for Users.
 
         Args:
             params (dict): Send a dictionary of ODATA Params without the "$".
@@ -85,7 +83,9 @@ class Archer(ArcherBase):
         resp_data = resp.json()
         if raw:
             return resp
-        return [self.user(user['RequestedObject']['Id']) for user in resp_data]
+        return [
+            self.get_user(user['RequestedObject']['Id']) for user in resp_data
+        ]
 
     def create_user(
         self,
@@ -95,6 +95,22 @@ class Archer(ArcherBase):
         password: str,
         account_status: int = 1
     ):
+        """Create User.
+
+        Create an archer user.
+
+        Args:
+            username (str): Desired username
+            first_name (str): User's first name
+            last_name (str): User's last name
+            password (str): User's password
+            account_status (int): Pass the integer value for active, inactive,
+            locked
+
+        Returns:
+            resp (requests.models.Response)
+
+        """
         data = {
             "User": {
                 "FirstName": first_name,
@@ -112,21 +128,265 @@ class Archer(ArcherBase):
 
         return resp
 
-    def group(self, obj_id):
+    def get_group(self, obj_id):
+        """Get a group.
+
+        Get a archer group object
+
+        Args:
+            obj_id (int): Group ID
+
+        Returns:
+            pyarcher.group.Group
+
+        """
         return self.factory(obj_id, Group)
 
-    def all_groups(self) -> dict:
+    def get_all_groups(self) -> dict:
+        """Get all archer groups.
+
+        Returns:
+            groups (List[pyarcher.group.Group])
+
+        """
         resp = self.request_helper("core/system/group/", method="get")
         resp_data = resp.json()
         groups = []
         for group in resp_data:
             new_group = self.group(group["RequestedObject"]["Id"])
-            new_group.metadata(group["RequestedObject"])
+            new_group.metadata = group["RequestedObject"]
+            group_data = self._group_setter(new_group.obj_id)
+            new_group.parent_groups = group_data['parent_groups']
+            new_group.members = group_data['members']
             groups.append(new_group)
         return groups
 
+    def update_group(
+        self,
+        group_id: int,
+        name: str,
+        parent_groups: list = None,
+        child_groups: list = None,
+        child_users: list = None
+    ):
+        """Update Group.
+
+        Update this groups child groups, members, name, description, or parent
+        groups. This function is delcarative, meaning whatever you specify will
+        be the truth.
+        WARNING: This will not update other objects that are affected by this.
+
+        Args:
+            group_id (int): Group ID to modify
+            name (str): Group Name
+            parent_group (list[int]): List of group ids to be set as a parent.
+            child_group (list[int]): List of group ids to be set as a child.
+            child_users (list[int]): List of user ids to be set as a member.
+
+        Returns:
+            resp (requests.models.Response)
+
+        """
+        api_url = f"core/system/group"
+        data = {
+            "Group": {
+                "Id": group_id,
+                "Name": name
+            },
+            "ParentGroups": parent_groups,
+            "ChildGroups": child_groups,
+            "ChildUsers": child_users
+        }
+        resp = self.request_helper(api_url, method="put", data=data)
+        return resp
+
+    def delete_group(self, group_id: int):
+        """Delete Group.
+
+        Args:
+            group_id (int): Group ID
+
+        Returns:
+            resp (requests.models.Response)
+
+        """
+        api_url = f"core/system/group/{group_id}"
+        resp = self.request_helper(api_url, method="delete", platform_api=True)
+        return resp
+
+    def create_group(
+        self,
+        name: str,
+        description: str = None,
+        parent_groups: list = None,
+        child_groups: list = None,
+        child_users: list = None
+    ):
+        """Create a group.
+
+        Args:
+            name (str): Name of the group.
+            description (str, optional): Description of the group.
+            parent_groups (list[int], optional): List of group ids to be set as
+            a parent.
+            child_Groups (list[int], optional): List of group ids to be set as
+            a child.
+            child_users (list[int], optional): List of user ids to be set as a
+            member.
+
+        Returns:
+            If successful:
+                pyarcher.group.Group
+            else:
+                resp (requests.models.Response)
+
+        """
+        api_url = f"core/system/group"
+        data = {
+            "Group": {
+                "Name": name,
+                "Description": description
+            },
+            "ParentGroups": parent_groups,
+            "ChildGroups": child_groups,
+            "ChildUsers": child_users
+        }
+        resp = self.request_helper(
+            api_url, data=data, method="post", platform_api=True
+        )
+        resp_data = resp.json()
+        if resp_data['IsSuccessful']:
+            return self.get_group(resp_data['RequestedObject']['Id'])
+        return resp
+
+    def modify_group_role(
+        self, group_id: int, role_id: int, is_add: bool
+    ):
+        """Modify Group Role.
+
+        Args:
+            group_id (int): Group id to target
+            role_id (int): Role id to add or remove from group
+            is_add (bool): Add or remove role from group
+
+        Returns:
+            If successful:
+                pyarcher.group.Group
+            else:
+                resp (requests.models.Response)
+
+        """
+        api_url = f"core/system/rolegroup"
+        data = {
+            "GroupId": group_id,
+            "RoleId": role_id,
+            "IsAdd": is_add
+        }
+        resp = self.request_helper(
+            api_url, method="put", data=data, platform_api=True
+        )
+        if resp.json()['IsSuccessful']:
+            return self.get_group(group_id)
+        return resp
+
+    def modify_child_group(
+        self, group_id: int, group_member_id: int, is_add: bool
+    ):
+        """Modify child group
+
+        Args:
+            group_id (int): Group id to target
+            group_member_id (int): Group id to add or remove from group member
+            is_add (bool): Add or remove role from group
+
+        Returns:
+            If successful:
+                pyarcher.group.Group
+            else:
+                resp (requests.models.Response)
+
+        """
+        api_url = "core/system/groupmember"
+        data = {
+            "GroupId": group_id,
+            "GroupMemberId": group_member_id,
+            "IsAdd": is_add
+        }
+        resp = self.request_helper(
+            api_url, method="put", data=data, platform_api=True
+        )
+        if resp.json()['IsSuccessful']:
+            return self.get_group(group_id)
+        return resp
+
+    def get_groups_by_user(self, user_id: int):
+        """Get all groups that are assigned to a user.
+
+        Args:
+            user_id (int): User id to check groups
+
+        Returns:
+            List[pyarcher.group.Groups]
+
+        """
+        api_url = f"core/system/group/user/{user_id}"
+        resp = self.request_helper(api_url, method="get", platform_api=True)
+        resp_data = resp.json()
+        groups = []
+        for data in resp_data:
+            if data['IsSuccessful']:
+                request_data = data['RequestedObject']
+                group = self.get_group(request_data['Id'])
+                group.metadata = request_data
+                groups.append(group)
+        return groups
+
+    def group_membership_setter(self, group_id: int):
+        """Group membership data form specific group.
+
+        Args:
+            group_id (int): Group ID
+
+        Returns:
+            hold (dict)
+
+        """
+        hold = {}
+        for data in self.group_membership:
+            if data['GroupId'] == group_id:
+                hold.update({"members": []})
+                if data['UserIds']:
+                    hold.update({"members": [
+                        self.get_user(user)
+                        for user in data['UserIds']
+                    ]})
+                hold.update({"parent_groups": []})
+                if data['ParentGroupIds']:
+                    hold.update({"parent_groups": [
+                        self.get_group(group)
+                        for group in data['ParentGroupIds']
+                    ]})
+        return hold
+
+    @property
+    def group_membership(self):
+        """Group Membership property method.
+
+        Returns:
+            List[Dict]
+
+        """
+        if not self._group_membership:
+            api_url = f"core/system/groupmembership"
+            resp_data = self.request_helper(api_url, method="get").json()
+            self._group_membership = [
+                data['RequestedObject'] for data in resp_data
+            ]
+
+        return self._group_membership
 
     def get_active_users_with_no_login(self):
+        """Prebuilt function for query_user."""
         params = {
             "select": "Id,UserName,DisplayName",
             "filter": "AccountStatus eq '1'and LastLoginDate eq null",
@@ -134,7 +394,18 @@ class Archer(ArcherBase):
         }
         return self.query_users(params)
 
-    def application(self, obj_id):
+    def get_application(self, obj_id: int):
+        """Get an application.
+
+        Get an archer application object
+
+        Args:
+            obj_id (int): Application ID
+
+        Returns:
+            pyarcher.application.Application
+
+        """
         return self.factory(obj_id, Application)
 
     def all_application(self):
@@ -144,6 +415,8 @@ class Archer(ArcherBase):
             self.application(app['RequestedObject']['Id']) for app in resp_data
         ]
 
+
+    # TODO: Remove all old code below
     def create_content_record(self, fields_json, record_id=None):
         """
         :param fields_json: {field name how you see it in the app: value content

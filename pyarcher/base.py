@@ -5,6 +5,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 
 import requests
+from cachetools import cached, LRUCache, TTLCache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,6 +58,7 @@ class ArcherBase(metaclass=ABCMeta):
 
         self.api_url_base = f"{self.url}/api/"
         self.content_api_url_base = f"{self.url}/contentapi/"
+        self.platform_api_url_base = f"{self.url}/platformapi/"
 
         self.session = requests.Session()
         self.session.cert = client_cert
@@ -69,6 +71,7 @@ class ArcherBase(metaclass=ABCMeta):
         accept: str = "application/json,text/html,application/xhtml+xml,application/xml;q =0.9,*/*;q=0.8",
         content_type: str = "application/json",
         content_api: bool = False,
+        platform_api: bool = False,
         data: dict = None,
         params: dict = None,
         verify: bool = False
@@ -116,10 +119,14 @@ class ArcherBase(metaclass=ABCMeta):
         base_url = self.api_url_base
         if content_api:
             base_url = self.content_api_url_base
+        elif platform_api:
+            base_url = self.platform_api_url_base
 
         url = f"{base_url}{path}"
         call = getattr(self.session, method)
-        return call(url, json=data, params=params)
+        resp = call(url, json=data, params=params)
+        #resp.raise_for_status()
+        return resp
 
     def login(self, sso: bool = False):
         """Login for RSA Archer.

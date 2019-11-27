@@ -26,3 +26,5 @@ ptpython = "*"
 [packages]
 pyarcher = {path = ".",editable = true}
 requests = "*"
+ptipython = "*"
+cachetools = "*"
