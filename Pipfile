@@ -21,10 +21,7 @@ autopep8 = "*"
 bandit = "*"
 pydocstyle = "*"
 mypy = "*"
-ptpython = "*"
 
 [packages]
 pyarcher = {path = ".",editable = true}
 requests = "*"
-ptipython = "*"
-cachetools = "*"

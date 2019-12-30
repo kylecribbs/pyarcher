@@ -43,6 +43,10 @@ class Archer(ArcherBase):
         """Refresh Metadata."""
         pass
 
+    @property
+    def _dirty_objects(self):
+        """Keeps track of a list of dirty objects."""
+
     def get_user(self, obj_id: int):
         """Get a user.
 
@@ -128,6 +132,14 @@ class Archer(ArcherBase):
 
         return resp
 
+    def update_user(self, obj_id):
+        """Update User."""
+        # TODO: Create method
+
+    def delete_user(self, obj_id):
+        """Delete User."""
+        # TODO: Create method
+
     def get_group(self, obj_id):
         """Get a group.
 
@@ -141,6 +153,63 @@ class Archer(ArcherBase):
 
         """
         return self.factory(obj_id, Group)
+
+    def get_group_hierarchy(self):
+        """Get all group hierarchy."""
+        resp = self.request_helper(
+            "core/system/grouphierarchy",
+            method="get"
+        )
+        resp_data = resp.json()
+        hierarchy_groups = {}
+        for data in resp_data:
+            _id = data['RequestedObject']['Id']
+            related_id = data['RequestedObject']['RelatedId']
+            generation = data['RequestedObject']['Generation']
+            if hierarchy_groups.get(_id):
+                hold = hierarchy_groups[_id]
+                hold.append({
+                    "group": self.get_group(related_id),
+                    "generation": generation
+                })
+                hierarchy_groups[_id] = hold
+            else:
+                hierarchy_groups[_id] = [{
+                    "group": self.get_group(related_id),
+                    "generation": generation
+                }]
+        return hierarchy_groups
+
+
+    def query_groups(self, params: dict = {}, raw=False):
+        """Query for Groups.
+
+        Args:
+            params (dict): Send a dictionary of ODATA Params without the "$".
+                Example: params['filter'] = "Name eq 'group_name'"
+
+        Returns:
+            requests.models.Response: The response of the http call from
+                requests.
+        """
+        if "Id" not in params.get(
+            "select",
+            "Id,DisplayName,FirstName,LastName"
+        ):
+            params['select'] = f"Id,{params['select']}"
+
+        params = {f"${key}": value for key, value in params.items()}
+        resp = self.request_helper(
+            "core/system/group/",
+            method="get",
+            params=params
+        )
+        if raw:
+            return resp
+        resp_data = resp.json()
+        return [
+            self.get_group(user['RequestedObject']['Id']) for user in resp_data
+        ]
 
     def get_all_groups(self) -> dict:
         """Get all archer groups.

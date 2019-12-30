@@ -22,6 +22,8 @@ class Group(ArcherBase):
     _metadata: dict = None
     _members = None
     _parent_groups = None
+    _child_groups = None
+    _all_members = None
 
     def __init__(self, obj_id: int, **kwargs):
         """Init."""
@@ -185,7 +187,13 @@ class Group(ArcherBase):
         """Delete this group."""
         return self.archer.delete_group(self.obj_id)
 
-    def update_group(self, *args, **kwargs):
+    def update_group(
+        self,
+        name: str = None,
+        parent_groups: list = None,
+        child_groups: list = None,
+        child_users: list = None
+    ):
         """Update Group.
 
         Update this groups child groups, members, name, description, or parent
@@ -200,7 +208,26 @@ class Group(ArcherBase):
 
         """
         # TODO: convert to object and update all objects
-        resp = self.archer.update_group(self.obj_id, *args, **kwargs)
+        name = name or self.metadata['Name']
+
+        def try_list_comp(objs):
+            try:
+                value = [obj.obj_id for obj in objs]
+            except TypeError:
+                value = None
+            return value
+
+        parent_groups = try_list_comp(parent_groups)
+        child_groups = try_list_comp(child_groups)
+        child_users = try_list_comp(child_users)
+
+        resp = self.archer.update_group(
+            self.obj_id,
+            name,
+            parent_groups=parent_groups,
+            child_groups=child_groups,
+            child_users=child_users
+        )
         self.membership_setter()
         return resp
 
@@ -215,6 +242,24 @@ class Group(ArcherBase):
         self.parent_groups = group_data['parent_groups']
         self.members = group_data['members']
 
+    def child_setter(self):
+        """Child property setter."""
+        hierachy_data = self.archer.get_group_hierarchy()
+        self.child_groups = hierachy_data.get(self.obj_id, [])
+        return self.child_groups
+
+    def get_all_members(self):
+        _ids = set()
+        users = []
+        for child_group in self.child_groups:
+            for member in child_group['group'].members:
+                _ids.add(member.obj_id)
+        for _id in _ids:
+            users.append(
+                self.archer.get_user(_id)
+            )
+        self.all_members = users
+
     @property
     def members(self):
         """Members property."""
@@ -226,6 +271,18 @@ class Group(ArcherBase):
     def members(self, data):
         """Members property setter."""
         self._members = data
+        return self._members
+
+    @property
+    def all_members(self):
+        """All members including nest property."""
+        if not self._all_members:
+            self.get_all_members()
+        return self._all_members
+
+    @all_members.setter
+    def all_members(self, data):
+        self._all_members = data
         return self._members
 
     @property
@@ -247,3 +304,15 @@ class Group(ArcherBase):
     def parent_groups(self, data):
         """Parent Groups property setter."""
         self._parent_groups = data
+
+    @property
+    def child_groups(self):
+        """Child Groups property."""
+        if not self._child_groups:
+            self.child_setter()
+        return self._child_groups
+
+    @child_groups.setter
+    def child_groups(self, data):
+        """Child Groups property setter."""
+        self._child_groups = data

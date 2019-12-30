@@ -3,9 +3,9 @@
 """Main module."""
 import logging
 from abc import ABCMeta, abstractmethod
+from typing import Dict
 
 import requests
-from cachetools import cached, LRUCache, TTLCache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -125,8 +125,23 @@ class ArcherBase(metaclass=ABCMeta):
         url = f"{base_url}{path}"
         call = getattr(self.session, method)
         resp = call(url, json=data, params=params)
-        #resp.raise_for_status()
+        # resp_data = resp.json()
+        # if isinstance(resp_data, list):
+        #     for data in resp_data:
+        #         self.check_error(data)
+        # else:
+        #     self.check_error(resp_data)
+
         return resp
+
+    def check_error(self, data: Dict):
+        """Check Error from response data."""
+        if not data['IsSuccessful']:
+            for error in data['ValidationMessages']:
+                self.logger.error(error['Description'])
+                print("error")
+                return True
+        return False
 
     def login(self, sso: bool = False):
         """Login for RSA Archer.
@@ -201,3 +216,10 @@ class ArcherBase(metaclass=ABCMeta):
         self._metadata = data
         return self._metadata
 
+
+    @property
+    def exists(self):
+        exist = False
+        if self.metadata:
+            exist = True
+        return exist
