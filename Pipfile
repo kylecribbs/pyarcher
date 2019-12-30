@@ -26,4 +26,3 @@ commitizen = "*"
 [packages]
 pyarcher = {path = ".",editable = true}
 requests = "*"
-
