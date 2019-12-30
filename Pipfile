@@ -21,6 +21,7 @@ autopep8 = "*"
 bandit = "*"
 pydocstyle = "*"
 mypy = "*"
+commitizen = "*"
 
 [packages]
 pyarcher = {path = ".",editable = true}
