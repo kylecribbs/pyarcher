@@ -93,10 +93,8 @@ class User(ArcherBase):
 
     @property
     def archer(self):
-        from pyarcher.archer import Archer
-
-        to_pass = self._pass_archer_base()
-        return Archer(**to_pass)
+        archer = self.resource("archer")
+        return archer
 
     def activate(self):
         """

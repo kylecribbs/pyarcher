@@ -22,7 +22,9 @@ bandit = "*"
 pydocstyle = "*"
 mypy = "*"
 commitizen = "*"
+ptipython = "*"
 
 [packages]
 pyarcher = {path = ".",editable = true}
 requests = "*"
+requests-mock = "*"

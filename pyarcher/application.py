@@ -55,9 +55,9 @@ class Application(ArcherBase):
             field = self.field(json_field['RequestedObject']['Id'])
             field.metadata = json_field['RequestedObject']
 
-            validated_field = self.factory(
-                field.metadata[field_type.key],
-                field_type.inst_class
+            validated_field = self.resource(
+                field_type.class_name,
+                field.metadata[field_type.key]
             )
 
             self._fields.append(validated_field)
@@ -72,10 +72,10 @@ class Application(ArcherBase):
         return self._fields
 
     def field(self, obj_id):
-        return self.factory(obj_id, Field)
+        return self.resource("field", obj_id=obj_id)
 
     def values_list(self, obj_id):
-        return self.factory(obj_id, ValuesList)
+        return self.resource("values_list", obj_id=obj_id)
 
     def records(self):
         pass

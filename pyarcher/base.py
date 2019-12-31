@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
 """Main module."""
+
+import re
 import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict
+from importlib import import_module
 
 import requests
+import requests_mock
+
+from pyarcher.stubber import stubber
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,6 +68,12 @@ class ArcherBase(metaclass=ABCMeta):
 
         self.session = requests.Session()
         self.session.cert = client_cert
+
+        # For mocking
+        self.adapter = requests_mock.Adapter()
+        self.session.mount('mock', self.adapter)
+        self.mock_response = None
+        self.adapter.add_matcher(stubber)
 
     def request_helper(
         self,
@@ -123,15 +135,15 @@ class ArcherBase(metaclass=ABCMeta):
             base_url = self.platform_api_url_base
 
         url = f"{base_url}{path}"
+
+        # For Mocking
+        if self.mock_response:
+            self.logger.info("Mocking up response")
+            url = re.sub(r"https|http", "mock", url)
+            self.adapter.register_uri(method, url, text=self.mock_response)
+
         call = getattr(self.session, method)
         resp = call(url, json=data, params=params)
-        # resp_data = resp.json()
-        # if isinstance(resp_data, list):
-        #     for data in resp_data:
-        #         self.check_error(data)
-        # else:
-        #     self.check_error(resp_data)
-
         return resp
 
     def check_error(self, data: Dict):
@@ -182,13 +194,41 @@ class ArcherBase(metaclass=ABCMeta):
         # TODO: Create logout
         pass
 
-    def factory(self, obj_id, obj):
-        to_pass = self._pass_archer_base()
-        to_pass['obj_id'] = obj_id
-        pass_obj = obj(**to_pass)
-        return pass_obj
+    def resource(self, resource, **kwargs):
+        """Dynamically get a resource.
 
-    def _pass_archer_base(self):
+        Args:
+            resource (str): Resource name to get like application, field, etc
+
+        Kwargs:
+            Any kwargs to pass to the resource
+
+        Returns:
+            Resource Class
+        """
+        to_pass = self._pass_init()
+        if kwargs:
+            to_pass.update(kwargs)
+
+        hold = resource.lower().split("_")
+        hold = [temp.capitalize() for temp in hold]
+        class_name = "".join(hold)
+        _class = self.dynamic_import(
+            f"pyarcher.{resource}",
+            class_name
+        )
+        return _class(**to_pass)
+
+    @staticmethod
+    def dynamic_import(abs_module_path, class_name):
+        """Use for dynamiically importing modules."""
+        module_object = import_module(abs_module_path)
+        target_class = getattr(module_object, class_name)
+
+        return target_class
+
+
+    def _pass_init(self):
         to_pass = [
             "url", "instance_name", "user_domain", "username", "password",
             "client_cert", "session_token"

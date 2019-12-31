@@ -288,10 +288,8 @@ class Group(ArcherBase):
     @property
     def archer(self):
         """Archer property."""
-        from pyarcher.archer import Archer
-
-        to_pass = self._pass_archer_base()
-        return Archer(**to_pass)
+        archer = self.resource("archer")
+        return archer
 
     @property
     def parent_groups(self):
@@ -309,7 +307,7 @@ class Group(ArcherBase):
     def child_groups(self):
         """Child Groups property."""
         if not self._child_groups:
-            self.child_setter()
+            return self.child_setter()
         return self._child_groups
 
     @child_groups.setter
