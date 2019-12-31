@@ -6,7 +6,7 @@ from pyarcher.archer import Archer
 
 __author__ = """Kyle Cribbs"""
 __email__ = 'kylecribbs@outlook.com'
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 __all__ = ["Archer"]
 
 name = "pyarcher"
