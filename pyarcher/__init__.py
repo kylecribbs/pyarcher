@@ -2,6 +2,7 @@
 
 """Top-level package for RSA Archer Client Library."""
 from pyarcher.archer import Archer
+from pyarcher.archer_db import ArcherDB
 
 
 __author__ = """Kyle Cribbs"""

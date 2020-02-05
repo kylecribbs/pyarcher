@@ -28,3 +28,5 @@ ptipython = "*"
 pyarcher = {path = ".",editable = true}
 requests = "*"
 requests-mock = "*"
+sqlalchemy = "*"
+pyodbc = "*"
