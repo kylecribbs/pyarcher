@@ -40,6 +40,7 @@ Centos: Required packages are gcc-c++ python-devel unixODBC-devel freetds
 Note: In the future we will have pyarcher.ArcherDB separated from pyarcher.Archer.
 
 You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini you may need the following configure
+
 ```ini
 [FreeTDS]
 Description=FreeTDS Driver
@@ -49,6 +50,7 @@ tds_version=8.0
 ```
 
 FreeTDS python example
+
 ```python
 from pyarcher import ArcherDB
 archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
