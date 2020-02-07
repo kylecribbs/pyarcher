@@ -11,5 +11,6 @@
     "editor.minimap.maxColumn": 80,
     "python.linting.banditEnabled": true,
     "python.linting.mypyEnabled": true,
-    "python.linting.pydocstyleEnabled": true
+    "python.linting.pydocstyleEnabled": true,
+    "restructuredtext.confPath": "${workspaceFolder}/docs"
 }

@@ -23,6 +23,9 @@ pydocstyle = "*"
 mypy = "*"
 commitizen = "*"
 ptipython = "*"
+docutils = "*"
+sphinx-autobuild = "*"
+doc8 = "*"
 
 [packages]
 pyarcher = {path = ".",editable = true}

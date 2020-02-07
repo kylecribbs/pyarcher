@@ -43,6 +43,7 @@ Note: In the future we will have pyarcher.ArcherDB separated from pyarcher.Arche
 You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini you may need the following configure
 
 .. code-block:: ini
+
     [FreeTDS]
     Description=FreeTDS Driver
     Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
@@ -52,9 +53,9 @@ You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini y
 FreeTDS python example
 
 .. code-block:: python
+
     from pyarcher import ArcherDB
     archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
     table = archer.get_table("tblAsyncJobQueue")
     select = table.select()
     data = archer.engine.execute(select)
-
