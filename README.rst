@@ -34,13 +34,17 @@ Features
 
 Install
 --------
-ArcherDB requires pyodbc for connecting to mssql so you may need to install additional packages.
+ArcherDB requires pyodbc for connecting to mssql so you may need to install
+additional packages.
 
-Ubuntu: Required packages are unixodbc-dev g++ freetds-dev freetds-bin tdsodbc
-Centos: Required packages are gcc-c++ python-devel unixODBC-devel freetds
-Note: In the future we will have pyarcher.ArcherDB separated from pyarcher.Archer.
+**Ubuntu:** Required packages are unixodbc-dev g++ freetds-dev freetds-bin
+tdsodbc
+**Centos:** Required packages are gcc-c++ python-devel unixODBC-devel freetds
+**Note:** In the future we will have pyarcher.ArcherDB separated from
+pyarcher.Archer.
 
-You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini you may need the following configure
+You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini
+you may need the following configure
 
 .. code-block:: ini
 

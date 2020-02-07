@@ -32,14 +32,15 @@ wanted" is open to whoever wants to implement it.
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitHub issues for features. Anything tagged with "enhancement"
-and "help wanted" is open to whoever wants to implement it.
+Look through the GitHub issues for features. Anything tagged with
+"enhancement" and "help wanted" is open to whoever wants to implement it.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-RSA Archer Client Library could always use more documentation, whether as part of the
-official RSA Archer Client Library docs, in docstrings, or even on the web in blog posts,
+RSA Archer Client Library could always use more documentation, whether as part
+of the official RSA Archer Client Library docs, in docstrings, or even on the
+web in blog posts,
 articles, and such.
 
 Submit Feedback
@@ -64,7 +65,9 @@ Ready to contribute? Here's how to set up `pyarcher` for local development.
 
     $ git clone git@github.com:your_name_here/pyarcher.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv. Assuming you have
+   virtualenvwrapper installed, this is how you set up your fork for local
+   development::
 
     $ pipenv install
     $ pipenv shell
@@ -75,8 +78,8 @@ Ready to contribute? Here's how to set up `pyarcher` for local development.
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+5. When you're done making changes, check that your changes pass flake8 and
+   the tests, including testing other Python versions with tox::
 
     $ flake8 pyarcher tests
     $ python setup.py test or py.test
