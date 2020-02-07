@@ -42,27 +42,19 @@ Note: In the future we will have pyarcher.ArcherDB separated from pyarcher.Arche
 
 You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini you may need the following configure
 
-.. highlight:: ini
-     [FreeTDS]
-     Description=FreeTDS Driver
-     Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
-     Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so
-     tds_version=8.0
+.. code-block:: ini
+    [FreeTDS]
+    Description=FreeTDS Driver
+    Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
+    Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so
+    tds_version=8.0
 
 FreeTDS python example
 
-.. highlight:: python
-     from pyarcher import ArcherDB
-     archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
-     table = archer.get_table("tblAsyncJobQueue")
-     select = table.select()
-     data = archer.engine.execute(select)
+.. code-block:: python
+    from pyarcher import ArcherDB
+    archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
+    table = archer.get_table("tblAsyncJobQueue")
+    select = table.select()
+    data = archer.engine.execute(select)
 
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
