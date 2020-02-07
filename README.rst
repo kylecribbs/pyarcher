@@ -35,29 +35,31 @@ Features
 Install
 --------
 ArcherDB requires pyodbc for connecting to mssql so you may need to install additional packages.
+
 Ubuntu: Required packages are unixodbc-dev g++ freetds-dev freetds-bin tdsodbc
 Centos: Required packages are gcc-c++ python-devel unixODBC-devel freetds
 Note: In the future we will have pyarcher.ArcherDB separated from pyarcher.Archer.
 
 You may also need to configure your ODBC ini. For example in /etc/odbcinst.ini you may need the following configure
 
-```ini
-[FreeTDS]
-Description=FreeTDS Driver
-Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
-Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so
-tds_version=8.0
-```
+.. highlight:: ini
+   :linenothreshold: 5
+     [FreeTDS]
+     Description=FreeTDS Driver
+     Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
+     Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so
+     tds_version=8.0
 
 FreeTDS python example
 
-```python
-from pyarcher import ArcherDB
-archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
-table = archer.get_table("tblAsyncJobQueue")
-select = table.select()
-data = archer.engine.execute(select)
-```
+.. highlight:: python
+   :linenothreshold: 5
+     from pyarcher import ArcherDB
+     archer = ArcherDB("user", "password", "host", "database", query={"driver": "FreeTDS", "TDS_VERSION": "8.0"})
+     table = archer.get_table("tblAsyncJobQueue")
+     select = table.select()
+     data = archer.engine.execute(select)
+
 
 Credits
 -------
