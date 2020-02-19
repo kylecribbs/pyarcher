@@ -9,7 +9,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: kylecribbs
   on:
-    tags: true
+    #tags: true
     repo: kylecribbs/pyarcher
     python: 3.7
   password:
