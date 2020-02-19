@@ -2,8 +2,11 @@
 
 """Top-level package for RSA Archer Client Library."""
 from pyarcher.archer import Archer
-from pyarcher.archer_db import ArcherDB
-
+try:
+    from ._db import *
+except ImportError as exception:
+    print(exception)
+    pass
 
 __author__ = """Kyle Cribbs"""
 __email__ = 'kylecribbs@outlook.com'

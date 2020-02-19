@@ -164,8 +164,8 @@ JSON = {
                         "LdapFlag": False,
                         "DomainId": None,
                         "DistinguishedName": None,
-                        "DefaultHomeDashboardId":-1,
-                        "DefaultHomeWorkspaceId":-1,
+                        "DefaultHomeDashboardId": -1,
+                        "DefaultHomeWorkspaceId": -1,
                         "UpdateInformation": {
                             "CreateDate": "2016-09-21T18:04:02.643",
                             "UpdateDate": "2016-09-21T18:06:51.027",
@@ -235,7 +235,7 @@ JSON = {
                     "RequestedObject": {
                         "Id": 1,
                         "RelatedId": 1,
-                        "Generation":0
+                        "Generation": 0
                     },
                     "IsSuccessful": True,
                     "ValidationMessages": []
@@ -523,7 +523,7 @@ JSON = {
                         "UserName": "ericsc",
                         "AccountStatus": 1,
                         "DomainId": None,
-                        "SecurityId":6,
+                        "SecurityId": 6,
                         "Locale": "en-US",
                         "TimeZoneId": "EasternStandardTime",
                         "Address": "",
@@ -536,8 +536,8 @@ JSON = {
                         "DistinguishedName": None,
                         "Type": 1,
                         "LanguageId": None,
-                        "DefaultHomeDashboardId":-1,
-                        "DefaultHomeWorkspaceId":-1,
+                        "DefaultHomeDashboardId": -1,
+                        "DefaultHomeWorkspaceId": -1,
                         "UpdateInformation": {
                             "CreateDate": "2015-06-29T17:12:29.107",
                             "UpdateDate": "2016-07-18T20:01:12.333",
@@ -601,8 +601,8 @@ JSON = {
                     "DistinguishedName": None,
                     "Type": 1,
                     "LanguageId": None,
-                    "DefaultHomeDashboardId":-1,
-                    "DefaultHomeWorkspaceId":-1,
+                    "DefaultHomeDashboardId": -1,
+                    "DefaultHomeWorkspaceId": -1,
                     "UpdateInformation": {
                         "CreateDate": "2015-06-29T17:12:29.107",
                         "UpdateDate": "2016-07-18T20:01:12.333",

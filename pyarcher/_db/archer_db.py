@@ -2,11 +2,19 @@
 
 """User module."""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import sessionmaker
+import xmltodict
+
+try:
+    from sqlalchemy import create_engine, MetaData, Table, and_
+    from sqlalchemy.engine.url import URL
+    from sqlalchemy.orm import sessionmaker
+except ModuleNotFoundError:
+    from pyarcher.exceptions import MissingExtras
+    raise MissingExtras(
+        "You need to install mock extras. pip install pyarcher[db]"
+    )
 
 logging.basicConfig(
     level=logging.INFO,
@@ -105,6 +113,28 @@ class ArcherDB:
                 autoload=True,
                 autoload_with=self.conf_engine
             )
+
+    @staticmethod
+    def sql_to_dict(data: list):
+        """Convert a list of sqlalchemy results to a list of dicts."""
+        return [d._asdict() for d in data]
+
+    def get_all_datafeeds(self):
+        """Get all datafeeds."""
+        table = self.get_table("tblDatafeed")
+        return self.sql_to_dict(self.inst_session.query(table).all())
+
+    def get_datafeed_history(self, datafeed_id):
+        """Get a datafeeds history."""
+        table = self.get_table("tblDataFeedHistory")
+        return self.inst_session.query(table).filter(
+            table.c.datafeed_id == datafeed_id
+        ).all()
+
+    def get_async_job_schedule(self):
+        """Get all scheduled jobs."""
+        table = self.get_table("tblAsyncJobSchedule")
+        return self.sql_to_dict(self.inst_session.query(table).all())
 
     def get_job_tables(self, query: bool = True) -> dict:
         """List of static tables used for Job Engine.
@@ -210,3 +240,75 @@ class ArcherDB:
                     )
                     connection.execute(query)
                     logging.info(query)
+
+    def reschedule_active_jobs(self):
+        """Reschedule active jobs that archer stopped scheduling.
+
+        It usually stops scheduling a job because the job server failed to
+        communicate with IIS or the Database.
+        """
+        table = self.get_table("tblAsyncJobSchedule")
+        async_job_schedule_data = self.inst_session.query(table).filter(
+            table.c.JobType.like("%DataFeed%")
+        ).all()
+        async_job_schedule_dict = self.sql_to_dict(async_job_schedule_data)
+
+        hold = []
+        for row in async_job_schedule_dict:
+            table = self.get_table("tblAsyncJobQueue")
+            job_queue = self.inst_session.query(table).filter(
+                table.c.ScheduleId == row['ScheduleId']
+            )
+
+            if not job_queue.count():
+                json_data = xmltodict.parse(row['RecurringState'])
+                datafeed_id = (
+                    json_data['JobSchedule.RecurringState']
+                             ['StartupParameters']
+                             ['KeyValuePairs']
+                             ['KeyValuePairOfstringanyType']
+                             ['value']
+                             ['#text']
+                )
+                if int(datafeed_id) != 1:
+                    # Datafeed ID 1 is Admin, ignore it
+                    past_date = datetime.now() - timedelta(minutes=5)
+                    table = self.get_table("tblDataFeedHistory")
+                    history_data = self.inst_session.query(table).filter(
+                        and_(
+                            table.c.start_time > past_date,
+                            table.c.datafeed_id == datafeed_id
+                        )
+                    )
+                    if history_data.count() != 0:
+                        hold.append(row)
+        return hold
+
+
+
+    # def build_temp_table(self, configure: list):
+    #     with self.inst_engine.begin() as connection:
+    #         for sql in configure:
+    #             connection.execute(sql)
+
+    # def build_select_temp_table(self, columns: list, data):
+    #     new_data = []
+    #     for row in data:
+    #         new_json = {}
+    #         for index, record in enumerate(row):
+    #             new_json.update({
+    #                 columns[index]: record
+    #             })
+    #         new_data.append(new_json)
+    #     return new_data
+
+    # def job_info(self):
+    #     self.build_temp_table(job_info['general']['configure'])
+    #     with self.inst_engine.begin() as connection:
+    #         data = connection.execute(
+    #             job_info['general']['select']
+    #         ).fetchall()
+    #     return self.build_select_temp_table(
+    #         job_info['general']['columns'],
+    #         data
+    #     )

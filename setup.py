@@ -22,6 +22,11 @@ setup_requirements = ['pytest-runner', ]
 
 test_requirements = ['pytest', ]
 
+try:
+    db_requirements = open('requirements.db.txt').readlines()
+except FileNotFoundError:
+    db_requirements = []
+
 setup(
     author="Kyle Cribbs",
     author_email='kylecribbs@outlook.com',
@@ -41,6 +46,9 @@ setup(
     name='pyarcher',
     packages=find_packages(include=['pyarcher']),
     setup_requires=setup_requirements,
+    extras_require={
+        "db": db_requirements
+    },
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/kylecribbs/pyarcher',
