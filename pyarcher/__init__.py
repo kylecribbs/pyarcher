@@ -10,7 +10,7 @@ except ImportError as exception:
 
 __author__ = """Kyle Cribbs"""
 __email__ = 'kylecribbs@outlook.com'
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 __all__ = ["Archer"]
 
 name = "pyarcher"
