@@ -1,4 +1,4 @@
-ptipython
+ptipython==1.0.1
 ipython
 bandit
 tox
