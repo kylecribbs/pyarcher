@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
 
-import re
 import logging
+import re
 from abc import ABCMeta, abstractmethod
-from typing import Dict
 from importlib import import_module
+from typing import Dict
 
 import requests
 import requests_mock
 
 from pyarcher.stubber import stubber
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class ArcherBase(metaclass=ABCMeta):
@@ -41,6 +38,7 @@ class ArcherBase(metaclass=ABCMeta):
     """
 
     _metdata: dict = None
+    _endpoints: list = None
 
     def __init__(
         self,
@@ -80,14 +78,14 @@ class ArcherBase(metaclass=ABCMeta):
         path: str,
         method: str = "post",
         method_override: str = None,
-        accept: str = "application/json,text/html,application/xhtml+xml,application/xml;q =0.9,*/*;q=0.8",
+        accept:
+        str = "application/json,text/html,application/xhtml+xml,application/xml;q =0.9,*/*;q=0.8",
         content_type: str = "application/json",
         content_api: bool = False,
         platform_api: bool = False,
         data: dict = None,
         params: dict = None,
-        verify: bool = False
-    ):
+        verify: bool = False):
         """An RSA Archer request helper.
 
         Args:
@@ -121,8 +119,7 @@ class ArcherBase(metaclass=ABCMeta):
         headers["Content-Type"] = content_type
         if self.session_token:
             headers["Authorization"] = "Archer session-id={}".format(
-                self.session_token
-            )
+                self.session_token)
         if method_override:
             headers['X-Http-Method-Override'] = method_override
 
@@ -213,10 +210,7 @@ class ArcherBase(metaclass=ABCMeta):
         hold = resource.lower().split("_")
         hold = [temp.capitalize() for temp in hold]
         class_name = "".join(hold)
-        _class = self.dynamic_import(
-            f"pyarcher.{resource}",
-            class_name
-        )
+        _class = self.dynamic_import(f"pyarcher.{resource}", class_name)
         return _class(**to_pass)
 
     @staticmethod
@@ -227,7 +221,6 @@ class ArcherBase(metaclass=ABCMeta):
 
         return target_class
 
-
     def _pass_init(self):
         to_pass = [
             "url", "instance_name", "user_domain", "username", "password",
@@ -235,10 +228,15 @@ class ArcherBase(metaclass=ABCMeta):
         ]
         to_pass_dict = {
             key: value
-            for key, value in self.__dict__.items()
-            if key in to_pass and value
+            for key, value in self.__dict__.items() if key in to_pass and value
         }
         return to_pass_dict
+
+    def _get_endpoints(self):
+        """Application Endpoints."""
+        resp = self.request_helper("", content_api=True, method="get")
+        resp_data = resp.json()
+        return resp_data['value']
 
     @abstractmethod
     def refresh_metadata(self):
@@ -256,9 +254,16 @@ class ArcherBase(metaclass=ABCMeta):
         self._metadata = data
         return self._metadata
 
+    @property
+    def endpoints(self):
+        """Property Application endpoints."""
+        if not self._endpoints:
+            self._endpoints = self._get_endpoints()
+        return self._endpoints
 
     @property
     def exists(self):
+        """Property Metadata Exists."""
         exist = False
         if self.metadata:
             exist = True

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from pyarcher.base import ArcherBase
 
@@ -24,11 +23,8 @@ class Record(ArcherBase):
 
     def refresh_metadata(self):
         api_url = f"core/content/fieldcontent/"
-        fields = [field.metadata['Ids'] for field in self.application.feilds]
-        data = {
-            "FieldIds": fields,
-            "ContentIds": self.obj_id
-        }
+        fields = [field.metadata['Ids'] for field in self.application.fields]
+        data = {"FieldIds": fields, "ContentIds": self.obj_id}
         resp = self.request_helper(api_url, method="post", data=data)
         self._metadata = resp
         #self._metadata = resp_data['RequestedObject']

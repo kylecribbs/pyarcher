@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from typing import TypeVar
 
-from pyarcher.base import ArcherBase
 from pyarcher.archer_types import GroupClass, UserClass
+from pyarcher.base import ArcherBase
+
 
 class User(ArcherBase):
     """[summary].
@@ -35,10 +35,8 @@ class User(ArcherBase):
             self._groups = self.archer.get_groups_by_user(self.obj_id)
 
     def get_user_email(self):
-        resp = self.request_helper(
-            f"core/system/usercontact/{self.obj_id}",
-            method="get"
-        )
+        resp = self.request_helper(f"core/system/usercontact/{self.obj_id}",
+                                   method="get")
         resp_data = resp.json()
         if resp_data[0]['IsSuccessful']:
             return resp_data
@@ -53,11 +51,9 @@ class User(ArcherBase):
             "RoleId": f"{role_id}",
             "IsAdd": "true"
         }
-        resp = self.request_helper(
-            "core/system/userrole",
-            method="put",
-            data=data
-        )
+        resp = self.request_helper("core/system/userrole",
+                                   method="put",
+                                   data=data)
         return resp
 
     def remove_role(self, role_id):
@@ -74,11 +70,9 @@ class User(ArcherBase):
             "GroupId": f"{group_id}",
             "IsAdd": "true"
         }
-        resp = self.request_helper(
-            "core/system/usergroup",
-            method="put",
-            data=data
-        )
+        resp = self.request_helper("core/system/usergroup",
+                                   method="put",
+                                   data=data)
         self.refresh_groups()
         return resp
 
@@ -101,9 +95,7 @@ class User(ArcherBase):
         :return: log message of success or failure
         """
         resp = self.request_helper(
-            f"core/system/user/status/active/{self.obj_id}",
-            method="post"
-        )
+            f"core/system/user/status/active/{self.obj_id}", method="post")
         return resp
 
     def deactivate(self):
@@ -111,7 +103,5 @@ class User(ArcherBase):
         :return: log message of success or failure
         """
         resp = self.request_helper(
-            f"core/system/user/status/inactive/{self.obj_id}",
-            method="post"
-        )
+            f"core/system/user/status/inactive/{self.obj_id}", method="post")
         return resp

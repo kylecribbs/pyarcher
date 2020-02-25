@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from pyarcher.base import ArcherBase
 
@@ -26,8 +25,7 @@ class ValuesList(ArcherBase):
 
     def refresh_values(self):
         api_url = "core/system/valueslistvalue/flat/valueslist/{}".format(
-            self.obj_id
-        )
+            self.obj_id)
         resp_data = self.request_helper(api_url, method="get").json()
         self._values = [value['RequestedObject'] for value in resp_data]
         return self._values

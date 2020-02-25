@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from typing import TypeVar
 
-from pyarcher.base import ArcherBase
 from pyarcher.archer_types import GroupClass, UserClass
+from pyarcher.base import ArcherBase
 
 
 class Group(ArcherBase):
@@ -75,8 +74,7 @@ class Group(ArcherBase):
 
         """
         members = [
-            member.obj_id
-            for member in self.members
+            member.obj_id for member in self.members
             if member.obj_id == user_obj.obj_id
         ]
         resp = self.update_group(self.metadata['Name'], child_users=members)
@@ -96,13 +94,11 @@ class Group(ArcherBase):
 
         """
         parent_groups = [
-            parent_group.obj_id
-            for parent_group in self.parent_groups
+            parent_group.obj_id for parent_group in self.parent_groups
         ]
         parent_groups.append(group_obj.obj_id)
-        resp = self.update_group(
-            self.metadata['Name'], parent_groups=parent_groups
-        )
+        resp = self.update_group(self.metadata['Name'],
+                                 parent_groups=parent_groups)
         group_obj.membership_setter()
         self.membership_setter()
         return resp
@@ -121,13 +117,11 @@ class Group(ArcherBase):
 
         """
         parent_groups = [
-            parent_group.obj_id
-            for parent_group in self.parent_groups
+            parent_group.obj_id for parent_group in self.parent_groups
             if parent_group.obj_id == group_obj.obj_id
         ]
-        resp = self.update_group(
-            self.metadata['Name'], parent_groups=parent_groups
-        )
+        resp = self.update_group(self.metadata['Name'],
+                                 parent_groups=parent_groups)
         group_obj.membership_setter()
         self.membership_setter()
         return resp
@@ -144,9 +138,9 @@ class Group(ArcherBase):
             resp (requests.models.Response)
 
         """
-        resp =  self.archer.modify_child_group(
-            self.obj_id, group_obj.obj_id, is_add=True
-        )
+        resp = self.archer.modify_child_group(self.obj_id,
+                                              group_obj.obj_id,
+                                              is_add=True)
         group_obj.membership_setter()
         return resp
 
@@ -163,37 +157,33 @@ class Group(ArcherBase):
             resp (requests.models.Response)
 
         """
-        resp =  self.archer.modify_child_group(
-            self.obj_id, group_obj.obj_id, is_add=False
-        )
+        resp = self.archer.modify_child_group(self.obj_id,
+                                              group_obj.obj_id,
+                                              is_add=False)
         group_obj.membership_setter()
         return resp
 
     def add_role(self, role_id):
         """Add role to this group."""
         # TODO: Pass role obj
-        return self.archer.modify_group_role(
-            self.obj_id, role_id, is_add=True
-        )
+        return self.archer.modify_group_role(self.obj_id, role_id, is_add=True)
 
     def remove_role(self, role_id):
         """Remove role from this group."""
         # TODO: Pass role obj
-        return self.archer.modify_group_role(
-            self.obj_id, role_id, is_add=False
-        )
+        return self.archer.modify_group_role(self.obj_id,
+                                             role_id,
+                                             is_add=False)
 
     def delete(self):
         """Delete this group."""
         return self.archer.delete_group(self.obj_id)
 
-    def update_group(
-        self,
-        name: str = None,
-        parent_groups: list = None,
-        child_groups: list = None,
-        child_users: list = None
-    ):
+    def update_group(self,
+                     name: str = None,
+                     parent_groups: list = None,
+                     child_groups: list = None,
+                     child_users: list = None):
         """Update Group.
 
         Update this groups child groups, members, name, description, or parent
@@ -221,13 +211,11 @@ class Group(ArcherBase):
         child_groups = try_list_comp(child_groups)
         child_users = try_list_comp(child_users)
 
-        resp = self.archer.update_group(
-            self.obj_id,
-            name,
-            parent_groups=parent_groups,
-            child_groups=child_groups,
-            child_users=child_users
-        )
+        resp = self.archer.update_group(self.obj_id,
+                                        name,
+                                        parent_groups=parent_groups,
+                                        child_groups=child_groups,
+                                        child_users=child_users)
         self.membership_setter()
         return resp
 
@@ -255,9 +243,7 @@ class Group(ArcherBase):
             for member in child_group['group'].members:
                 _ids.add(member.obj_id)
         for _id in _ids:
-            users.append(
-                self.archer.get_user(_id)
-            )
+            users.append(self.archer.get_user(_id))
         self.all_members = users
 
     @property

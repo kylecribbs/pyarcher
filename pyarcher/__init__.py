@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
 """Top-level package for RSA Archer Client Library."""
 from pyarcher.archer import Archer
+
 try:
     from ._db import *
 except ImportError as exception:

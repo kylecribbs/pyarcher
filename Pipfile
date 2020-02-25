@@ -26,6 +26,7 @@ ptipython = "*"
 docutils = "*"
 sphinx-autobuild = "*"
 doc8 = "*"
+pylint-fail-under = "*"
 
 [packages]
 pyarcher = {path = ".",editable = true}

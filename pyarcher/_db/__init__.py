@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Come back."""
 import pkg_resources
 

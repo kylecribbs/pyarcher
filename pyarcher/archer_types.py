@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
-from typing import TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from pyarcher.group import Group

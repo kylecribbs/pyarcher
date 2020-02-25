@@ -60,7 +60,7 @@ def lint(c):
     """
     Lint code
     """
-    c.run("flake8 {}".format(SOURCE_DIR))
+    #c.run("flake8 {}".format(SOURCE_DIR))
     c.run("pylint {}".format(SOURCE_DIR))
 
 

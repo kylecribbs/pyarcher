@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from pyarcher.base import ArcherBase
 
@@ -20,12 +19,16 @@ class Field(ArcherBase):
     _is_values_list: bool = None
 
     def __init__(self, obj_id: int = None, **kwargs):
+        """Init for field class."""
         self.obj_id = obj_id
         super().__init__(**kwargs)
 
     def refresh_metadata(self):
-        # TODO: Find Route
-        api_url = f"core/system/user/{self.obj_id}"
-        resp_data = self.request_helper(api_url, method="get").json()
-        self._metadata = resp_data['RequestedObject']
-        return self._metadata
+        """Return dict of metadata."""
+        return self.raw_metadata().json()['RequestedObject']
+
+    def raw_metadata(self):
+        """Return raw resp of metadata."""
+        api_url = f"core/system/fielddefinition/{self.obj_id}"
+        resp_data = self.request_helper(api_url, method="get")
+        return resp_data

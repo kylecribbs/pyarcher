@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
-import logging
 import json
+import logging
 
 import requests
 
-from pyarcher.user import User
-from pyarcher.group import Group
 from pyarcher.application import Application
 from pyarcher.base import ArcherBase
+from pyarcher.group import Group
+from pyarcher.user import User
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class Archer(ArcherBase):
@@ -39,6 +36,7 @@ class Archer(ArcherBase):
     """
 
     _group_membership: dict = None
+    _version: str = None
 
     def refresh_metadata(self):
         """Refresh Metadata."""
@@ -73,18 +71,14 @@ class Archer(ArcherBase):
             requests.models.Response: The response of the http call from
                 requests.
         """
-        if "Id" not in params.get(
-            "select",
-            "Id,DisplayName,FirstName,LastName"
-        ):
+        if "Id" not in params.get("select",
+                                  "Id,DisplayName,FirstName,LastName"):
             params['select'] = f"Id,{params['select']}"
 
         params = {f"${key}": value for key, value in params.items()}
-        resp = self.request_helper(
-            "core/system/user/",
-            method="get",
-            params=params
-        )
+        resp = self.request_helper("core/system/user/",
+                                   method="get",
+                                   params=params)
         resp_data = resp.json()
         if raw:
             return resp
@@ -92,14 +86,12 @@ class Archer(ArcherBase):
             self.get_user(user['RequestedObject']['Id']) for user in resp_data
         ]
 
-    def create_user(
-        self,
-        username: str,
-        first_name: str,
-        last_name: str,
-        password: str,
-        account_status: int = 1
-    ):
+    def create_user(self,
+                    username: str,
+                    first_name: str,
+                    last_name: str,
+                    password: str,
+                    account_status: int = 1):
         """Create User.
 
         Create an archer user.
@@ -125,11 +117,9 @@ class Archer(ArcherBase):
             "Password": password
         }
 
-        resp = self.request_helper(
-            "core/system/user",
-            method="post",
-            data=data
-        )
+        resp = self.request_helper("core/system/user",
+                                   method="post",
+                                   data=data)
 
         return resp
 
@@ -157,10 +147,7 @@ class Archer(ArcherBase):
 
     def get_group_hierarchy(self):
         """Get all group hierarchy."""
-        resp = self.request_helper(
-            "core/system/grouphierarchy",
-            method="get"
-        )
+        resp = self.request_helper("core/system/grouphierarchy", method="get")
         resp_data = resp.json()
         hierarchy_groups = {}
         for data in resp_data:
@@ -181,7 +168,6 @@ class Archer(ArcherBase):
                 }]
         return hierarchy_groups
 
-
     def query_groups(self, params: dict = {}, raw=False):
         """Query for Groups.
 
@@ -193,18 +179,14 @@ class Archer(ArcherBase):
             requests.models.Response: The response of the http call from
                 requests.
         """
-        if "Id" not in params.get(
-            "select",
-            "Id,DisplayName,FirstName,LastName"
-        ):
+        if "Id" not in params.get("select",
+                                  "Id,DisplayName,FirstName,LastName"):
             params['select'] = f"Id,{params['select']}"
 
         params = {f"${key}": value for key, value in params.items()}
-        resp = self.request_helper(
-            "core/system/group/",
-            method="get",
-            params=params
-        )
+        resp = self.request_helper("core/system/group/",
+                                   method="get",
+                                   params=params)
         if raw:
             return resp
         resp_data = resp.json()
@@ -228,14 +210,12 @@ class Archer(ArcherBase):
             groups.append(new_group)
         return groups
 
-    def update_group(
-        self,
-        group_id: int,
-        name: str,
-        parent_groups: list = None,
-        child_groups: list = None,
-        child_users: list = None
-    ):
+    def update_group(self,
+                     group_id: int,
+                     name: str,
+                     parent_groups: list = None,
+                     child_groups: list = None,
+                     child_users: list = None):
         """Update Group.
 
         Update this groups child groups, members, name, description, or parent
@@ -281,14 +261,12 @@ class Archer(ArcherBase):
         resp = self.request_helper(api_url, method="delete", platform_api=True)
         return resp
 
-    def create_group(
-        self,
-        name: str,
-        description: str = None,
-        parent_groups: list = None,
-        child_groups: list = None,
-        child_users: list = None
-    ):
+    def create_group(self,
+                     name: str,
+                     description: str = None,
+                     parent_groups: list = None,
+                     child_groups: list = None,
+                     child_users: list = None):
         """Create a group.
 
         Args:
@@ -318,17 +296,16 @@ class Archer(ArcherBase):
             "ChildGroups": child_groups,
             "ChildUsers": child_users
         }
-        resp = self.request_helper(
-            api_url, data=data, method="post", platform_api=True
-        )
+        resp = self.request_helper(api_url,
+                                   data=data,
+                                   method="post",
+                                   platform_api=True)
         resp_data = resp.json()
         if resp_data['IsSuccessful']:
             return self.get_group(resp_data['RequestedObject']['Id'])
         return resp
 
-    def modify_group_role(
-        self, group_id: int, role_id: int, is_add: bool
-    ):
+    def modify_group_role(self, group_id: int, role_id: int, is_add: bool):
         """Modify Group Role.
 
         Args:
@@ -344,21 +321,17 @@ class Archer(ArcherBase):
 
         """
         api_url = f"core/system/rolegroup"
-        data = {
-            "GroupId": group_id,
-            "RoleId": role_id,
-            "IsAdd": is_add
-        }
-        resp = self.request_helper(
-            api_url, method="put", data=data, platform_api=True
-        )
+        data = {"GroupId": group_id, "RoleId": role_id, "IsAdd": is_add}
+        resp = self.request_helper(api_url,
+                                   method="put",
+                                   data=data,
+                                   platform_api=True)
         if resp.json()['IsSuccessful']:
             return self.get_group(group_id)
         return resp
 
-    def modify_child_group(
-        self, group_id: int, group_member_id: int, is_add: bool
-    ):
+    def modify_child_group(self, group_id: int, group_member_id: int,
+                           is_add: bool):
         """Modify child group
 
         Args:
@@ -379,9 +352,10 @@ class Archer(ArcherBase):
             "GroupMemberId": group_member_id,
             "IsAdd": is_add
         }
-        resp = self.request_helper(
-            api_url, method="put", data=data, platform_api=True
-        )
+        resp = self.request_helper(api_url,
+                                   method="put",
+                                   data=data,
+                                   platform_api=True)
         if resp.json()['IsSuccessful']:
             return self.get_group(group_id)
         return resp
@@ -423,16 +397,18 @@ class Archer(ArcherBase):
             if data['GroupId'] == group_id:
                 hold.update({"members": []})
                 if data['UserIds']:
-                    hold.update({"members": [
-                        self.get_user(user)
-                        for user in data['UserIds']
-                    ]})
+                    hold.update({
+                        "members":
+                        [self.get_user(user) for user in data['UserIds']]
+                    })
                 hold.update({"parent_groups": []})
                 if data['ParentGroupIds']:
-                    hold.update({"parent_groups": [
-                        self.get_group(group)
-                        for group in data['ParentGroupIds']
-                    ]})
+                    hold.update({
+                        "parent_groups": [
+                            self.get_group(group)
+                            for group in data['ParentGroupIds']
+                        ]
+                    })
         return hold
 
     @property
@@ -475,13 +451,27 @@ class Archer(ArcherBase):
         """
         return self.resource("application", obj_id=obj_id)
 
-    def all_application(self):
+    def get_all_application(self):
         resp = self.request_helper("core/system/application/", method="get")
         resp_data = resp.json()
         return [
-            self.application(app['RequestedObject']['Id']) for app in resp_data
+            self.get_application(app['RequestedObject']['Id'])
+            for app in resp_data
         ]
 
+    def raw_version(self):
+        """Return dictionary of the version."""
+        api_url = f"core/system/applicationinfo/version"
+        resp_data = self.request_helper(api_url, method="get")
+        return resp_data
+
+    @property
+    def version(self):
+        """Property method for version"""
+        if not self._version:
+            _version = self.raw_version().json()['RequestedObject']['Version']
+            self._version = _version
+        return self._version
 
     # TODO: Remove all old code below
     # def create_content_record(self, fields_json, record_id=None):
@@ -521,7 +511,6 @@ class Archer(ArcherBase):
 
     #     except Exception as e:
     #         log.info("Function create_content_record didn't work, %s", e)
-
 
     # def create_sub_record(self, fields_json, subform_name):
     #     """LevelID is an application
@@ -630,7 +619,6 @@ class Archer(ArcherBase):
 
     #     except Exception as e:
     #         log.error("Function get_sub_record() didn't work, %s", e)
-
 
     # def all_endpoints(self):
     #     """

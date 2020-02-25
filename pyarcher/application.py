@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """User module."""
 from pyarcher.base import ArcherBase
 from pyarcher.field import Field
@@ -18,14 +17,26 @@ class Application(ArcherBase):
     """
 
     _metadata: dict = None
-    _fields: list = None
+    _fields: dict = None
 
     def __init__(self, obj_id: int = None, **kwargs):
+        """Application Init."""
         self.obj_id = obj_id
         super().__init__(**kwargs)
 
+    def check_alias(self):
+        """Check to see if Alias is a duplicate or exists."""
+        correct_alias = [
+            endpoint for endpoint in self.endpoints
+            if self.metadata['Alias'] == endpoint['name']
+        ]
+        if correct_alias:
+            self.logger.info("Found alias endpoint")
+            return True
+        self.logger.error("Unknown Alias")
+
     def refresh_metadata(self):
-        api_url = f"core/system/user/{self.obj_id}"
+        api_url = f"core/system/application/{self.obj_id}"
         resp_data = self.request_helper(api_url, method="get").json()
         self._metadata = resp_data['RequestedObject']
         return self._metadata
@@ -43,10 +54,10 @@ class Application(ArcherBase):
         # Prevents circular import
         from pyarcher.field_type_enum import FieldType
 
-        api_url = f"core/system/fielddefinition/application/{self.obj_id}"
-        resp_data = self.request_helper(api_url, method="get").json()
-        self._fields = []
+        resp_data = self.raw_fields().json()
+        self._fields = {}
         for json_field in resp_data:
+            #break out into a method
             try:
                 field_type = FieldType(json_field['RequestedObject']['Type'])
             except ValueError:
@@ -54,13 +65,11 @@ class Application(ArcherBase):
 
             field = self.field(json_field['RequestedObject']['Id'])
             field.metadata = json_field['RequestedObject']
-
             validated_field = self.resource(
-                field_type.class_name,
-                field.metadata[field_type.key]
-            )
+                field_type.class_name, obj_id=field.metadata[field_type.key])
 
-            self._fields.append(validated_field)
+            self._fields.update(
+                {json_field['RequestedObject']['Alias']: validated_field})
 
         return self._fields
 
@@ -71,11 +80,40 @@ class Application(ArcherBase):
             self._fields = self.refresh_app_fields()
         return self._fields
 
+    def raw_fields(self):
+        """Return Dictionary of all fields."""
+        api_url = f"core/system/fielddefinition/application/{self.obj_id}"
+        resp_data = self.request_helper(api_url, method="get")
+        return resp_data
+
     def field(self, obj_id):
+        # return field type (aka values list, etc)
         return self.resource("field", obj_id=obj_id)
 
-    def values_list(self, obj_id):
-        return self.resource("values_list", obj_id=obj_id)
+    # def records(self):
+    #     records = self.resource(
+    #         "record",
+    #         obj_id=field.metadata[field_type.key],
+    #         application=self.obj_id
+    #     )
 
-    def records(self):
-        pass
+    def content(self):
+        """Generator for all content records."""
+        skip = 0
+        while True:
+            data = self.raw_content(skip=skip).json()
+            if len(data['value']) == 0:
+                return
+            skip += 1000
+            yield data['value']
+
+    def raw_content(self, skip=0):
+        """Content records."""
+        api_url = f"{self.metadata['Alias']}?skip={skip}"
+        resp_data = self.request_helper(api_url,
+                                        content_api=True,
+                                        method="get")
+        return resp_data
+
+    def new_record(self, **kwargs):
+        """Create a new record."""

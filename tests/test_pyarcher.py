@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """Tests for `pyarcher` package."""
 
 import pytest
-
 
 from pyarcher import pyarcher
 

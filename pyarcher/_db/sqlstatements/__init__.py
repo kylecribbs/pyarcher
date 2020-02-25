@@ -33,8 +33,7 @@ job_info = {
                 ,  instrumentation_details XML
                 , last_touch_time DATETIME
             )
-            """,
-            """
+            """, """
                 INSERT INTO #jobDetail
                     ( jobid
                     , instrumentation_count
@@ -47,8 +46,7 @@ job_info = {
                     LEFT JOIN dbo.tblAsyncJobQueue ajq WITH (NOLOCK) ON ajq.JobId = ai.JobId
                     GROUP BY ai.jobid
                     ORDER BY COALESCE(MAX(ai.EndTime),MAX(ai.StartTime),MAX(ai.InactiveUntil),MAX(ai.EnqueueTime)) DESC
-            """,
-            """
+            """, """
                 UPDATE jd
                 SET jd.jobtype =  ai.JobType
                 ,jd.jobtypeNoVersion = SUBSTRING(ai.JobType,12,PATINDEX('%, version=%',ai.JobType)-12)
@@ -63,8 +61,7 @@ job_info = {
                 --, jd.datalengthNA = DATALENGTH(ai.named_arguments)
                 FROM #jobDetail jd
                 JOIN dbo.tblAsyncInstrumentation ai WITH (NOLOCK)  ON ai.JobId = jd.jobid AND ai.async_instrumentation_id = jd.max_async_instrumentation_id
-            """,
-            """
+            """, """
                 WITH XMLNAMESPACES ('http://schemas.microsoft.com/2003/10/Serialization/Arrays' AS a, 'http://schemas.datacontract.org/2004/07/System.Collections.Generic' AS b, 'http://schemas.microsoft.com/2003/10/Serialization/' AS z)
                 UPDATE jd
                 SET level_id =
@@ -102,32 +99,27 @@ job_info = {
                 FROM #jobDetail jd
                 JOIN dbo.tblAsyncInstrumentation ajq WITH (NOLOCK) ON ajq.JobId = jd.jobid
                 WHERE ajq.named_arguments IS NOT NULL;
-            """,
-            """
+            """, """
                 UPDATE jd
                 SET jd.datafeed_id = dfh.datafeed_id
                 FROM #jobDetail jd
                 JOIN dbo.tblDataFeedHistory dfh WITH (NOLOCK) ON dfh.datafeed_history_id = jd.datafeed_history_id
-            """,
-            """
+            """, """
                 UPDATE jd
                 SET jd.level_id = nt.level_id
                 FROM #jobDetail jd
                 JOIN dbo.tblNotificationTemplate nt WITH (NOLOCK) ON nt.notification_template_id = jd.notification_template_id
-            """,
-            """
+            """, """
                 UPDATE jd
                 SET jd.level_id = d.level_id
                 FROM #jobDetail jd
                 JOIN dbo.tblDatafeed d WITH (NOLOCK) ON d.datafeed_id = jd.datafeed_id
                 JOIN tblLevel l WITH (NOLOCK) ON l.level_id = d.level_id
-            """,
-            """
+            """, """
                 UPDATE cj SET cj.root_JobType = ai.JobType
                 FROM #jobDetail cj
                 JOIN dbo.tblAsyncInstrumentation ai WITH (NOLOCK)  ON ai.JobId = cj.root_job_id
-            """,
-            """
+            """, """
                 UPDATE jd
                 SET
                 instrumentation_details = CAST((SELECT
@@ -147,35 +139,17 @@ job_info = {
                 JOIN #jobDetail jd ON ai.JobId = jd.jobid
             """
         ],
-        "select": "SELECT * FROM #jobDetail jd",
+        "select":
+        "SELECT * FROM #jobDetail jd",
         "columns": [
-            "jobid",
-            "jobtype",
-            "jobtypeNoVersion",
-            "datalengthNA",
-            "module_id",
-            "level_id",
-            "datafeed_id",
-            "datafeed_history_id",
-            "data_publication_id",
-            "campaign_id",
-            "notification_template_id",
-            "field_id",
-            "content_id",
-            "field_id_count",
-            "content_id_count",
-            "generation",
-            "root_job_id",
-            "root_JobType",
-            "last_EnqueueTime",
-            "last_process_id",
-            "last_endpoint",
-            "last_StartTime",
-            "last_EndTime",
-            "last_durationM",
-            "instrumentation_count",
-            "max_async_instrumentation_id",
-            "instrumentation_details",
+            "jobid", "jobtype", "jobtypeNoVersion", "datalengthNA",
+            "module_id", "level_id", "datafeed_id", "datafeed_history_id",
+            "data_publication_id", "campaign_id", "notification_template_id",
+            "field_id", "content_id", "field_id_count", "content_id_count",
+            "generation", "root_job_id", "root_JobType", "last_EnqueueTime",
+            "last_process_id", "last_endpoint", "last_StartTime",
+            "last_EndTime", "last_durationM", "instrumentation_count",
+            "max_async_instrumentation_id", "instrumentation_details",
             "last_touch_time"
         ]
     },
