@@ -15,7 +15,7 @@ coverage
 wheel
 sphinx
 twine
-isort
+isort==4.3.21
 yapf
 setuptools
 pydocstyle
