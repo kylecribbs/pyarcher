@@ -10,7 +10,7 @@ pytest-cov
 commitizen
 pylint-fail-under
 invoke
-bumpversion
+bumpversion==0.5.3
 coverage
 wheel
 sphinx
