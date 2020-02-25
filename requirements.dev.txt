@@ -8,7 +8,7 @@ autopep8
 pylint
 pytest-cov
 commitizen
-pylint-fail-under
+pylint-fail-under==0.3.0
 invoke
 bumpversion
 coverage
