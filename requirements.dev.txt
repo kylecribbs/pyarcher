@@ -6,7 +6,7 @@ pytest
 flake8
 autopep8
 pylint
-pytest-cov
+pytest-cov==2.8.1
 commitizen
 pylint-fail-under
 invoke
