@@ -2,7 +2,7 @@ ptipython
 ipython
 bandit
 tox
-pytest
+pytest==5.4.1
 flake8
 autopep8
 pylint
