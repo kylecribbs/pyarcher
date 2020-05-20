@@ -1,7 +1,7 @@
 ptipython
 ipython
 bandit
-tox
+tox==3.15.1
 pytest
 flake8
 autopep8
