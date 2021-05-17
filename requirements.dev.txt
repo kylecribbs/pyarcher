@@ -18,7 +18,7 @@ twine
 isort
 yapf
 setuptools
-pydocstyle
+pydocstyle==6.1.1
 mypy
 docutils
 sphinx-autobuild
