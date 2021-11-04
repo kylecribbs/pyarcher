@@ -14,7 +14,7 @@ bumpversion
 coverage
 wheel
 sphinx
-twine
+twine==3.5.0
 isort
 yapf
 setuptools
