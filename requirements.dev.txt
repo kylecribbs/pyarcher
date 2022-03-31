@@ -22,4 +22,4 @@ pydocstyle
 mypy
 docutils
 sphinx-autobuild
-doc8
+doc8==0.11.1
