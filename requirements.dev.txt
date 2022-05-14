@@ -7,7 +7,7 @@ flake8
 autopep8
 pylint
 pytest-cov
-commitizen
+commitizen==2.26.0
 pylint-fail-under
 invoke
 bumpversion
