@@ -13,7 +13,7 @@ invoke
 bumpversion
 coverage
 wheel
-sphinx
+sphinx==6.1.3
 twine
 isort
 yapf
