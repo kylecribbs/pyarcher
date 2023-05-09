@@ -20,6 +20,6 @@ yapf
 setuptools
 pydocstyle
 mypy
-docutils
+docutils==0.20
 sphinx-autobuild
 doc8
