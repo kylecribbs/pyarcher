@@ -9,7 +9,7 @@ pylint
 pytest-cov
 commitizen
 pylint-fail-under
-invoke
+invoke==2.1.2
 bumpversion
 coverage
 wheel
