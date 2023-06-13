@@ -16,7 +16,7 @@ wheel
 sphinx
 twine
 isort
-yapf
+yapf==0.40.0
 setuptools
 pydocstyle
 mypy
