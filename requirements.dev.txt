@@ -11,7 +11,7 @@ commitizen
 pylint-fail-under
 invoke
 bumpversion
-coverage
+coverage==7.3.3
 wheel
 sphinx
 twine
