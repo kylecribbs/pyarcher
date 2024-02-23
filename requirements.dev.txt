@@ -5,7 +5,7 @@ tox
 pytest
 flake8
 autopep8
-pylint
+pylint==3.0.4
 pytest-cov
 commitizen
 pylint-fail-under
