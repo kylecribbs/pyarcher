@@ -12,7 +12,7 @@ pylint-fail-under
 invoke
 bumpversion
 coverage
-wheel
+wheel==0.43.0
 sphinx
 twine
 isort
