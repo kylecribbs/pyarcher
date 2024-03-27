@@ -1,2 +1,2 @@
 requests>=2.22.0
-requests-mock==1.7.0
+requests-mock==1.12.0
