@@ -1,5 +1,5 @@
 ptipython
-ipython
+ipython==8.24.0
 bandit
 tox
 pytest
