@@ -1,6 +1,6 @@
 ptipython
 ipython
-bandit
+bandit==1.7.9
 tox
 pytest
 flake8
