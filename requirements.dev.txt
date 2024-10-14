@@ -19,7 +19,7 @@ isort
 yapf
 setuptools
 pydocstyle
-mypy
+mypy==1.12.0
 docutils
 sphinx-autobuild
 doc8
