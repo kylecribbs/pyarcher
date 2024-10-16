@@ -17,7 +17,7 @@ sphinx
 twine
 isort
 yapf
-setuptools
+setuptools==75.2.0
 pydocstyle
 mypy
 docutils
